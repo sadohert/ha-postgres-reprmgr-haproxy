@@ -211,7 +211,23 @@ sudo journalctl -u keepalived -n 50
 
 # Check VRRP state
 sudo journalctl -u keepalived | grep -i "state"
+
+# Check VIP state change history
+sudo cat /var/log/keepalived-notify.log
+
+# Verify health check is working
+curl -sf http://localhost:8008/ready && echo "Health check OK" || echo "Health check FAILED"
+
+# Check unicast peer connectivity (if using unicast mode)
+grep unicast_peer -A3 /etc/keepalived/keepalived.conf
+ping -c 2 <PEER_IP>
 ```
+
+**Common Causes:**
+1. Health check script failing (`/ready` endpoint returning 503)
+2. Unicast peers unreachable (firewall or network issue)
+3. Interface name mismatch in configuration
+4. Authentication password mismatch between nodes
 
 **Solutions:**
 ```bash
@@ -220,7 +236,13 @@ sudo systemctl restart keepalived
 
 # Check interface name matches configuration
 ip link show
-cat /etc/keepalived/keepalived.conf | grep interface
+grep interface /etc/keepalived/keepalived.conf
+
+# Verify authentication password matches on all nodes
+sudo grep auth_pass /etc/keepalived/keepalived.conf
+
+# Test the health check endpoint
+curl -v http://localhost:8008/ready
 ```
 
 ---

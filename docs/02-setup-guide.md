@@ -461,17 +461,20 @@ vrrp_instance VI_1 {
 - **Unicast mode**: More reliable than multicast in virtualized environments
 - **Health check via `/ready`**: Verifies actual PostgreSQL connectivity, not just process existence
 
-### 6.4 Enable and Start Keepalived
+### 6.5 Enable and Start Keepalived
 
 ```bash
 sudo systemctl enable keepalived
 sudo systemctl start keepalived
 ```
 
-### 6.5 Verify VIP
+### 6.6 Verify VIP
 
 ```bash
 ip addr show | grep 192.168.87.100
+
+# Check the notify log
+sudo cat /var/log/keepalived-notify.log
 ```
 
 ---

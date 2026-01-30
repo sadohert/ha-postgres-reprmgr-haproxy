@@ -44,6 +44,16 @@ for node in pg1 pg2 pg3; do
 done
 ```
 
+### Check VIP History (Keepalived Notify Log)
+
+```bash
+# View VIP state change history
+sudo cat /var/log/keepalived-notify.log
+
+# Follow VIP changes in real-time
+sudo tail -f /var/log/keepalived-notify.log
+```
+
 ### Check Service Status
 
 ```bash

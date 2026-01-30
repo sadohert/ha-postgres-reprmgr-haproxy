@@ -34,6 +34,9 @@ sudo -u postgres psql -c "SELECT client_addr,
 ### Check VIP Location
 ```bash
 ip addr show | grep 192.168.87.100
+
+# View VIP state change history
+sudo cat /var/log/keepalived-notify.log
 ```
 
 ### Check All Services

@@ -58,7 +58,10 @@ This document describes a highly available PostgreSQL deployment using **repmgr*
 ### Keepalived
 - **Role**: Virtual IP (VIP) management using VRRP
 - **VIP**: 192.168.87.100
+- **Mode**: Unicast (recommended for VMware/virtualized environments)
 - **Failover**: VIP moves to healthy node if current holder fails
+- **Health Check**: Uses `/ready` endpoint to verify PostgreSQL connectivity
+- **Notification**: Logs VIP state changes to `/var/log/keepalived-notify.log`
 
 ## Connection Endpoints
 
