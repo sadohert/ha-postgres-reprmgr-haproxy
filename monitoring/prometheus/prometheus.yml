@@ -1,0 +1,63 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers: []
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Mattermost metrics
+  - job_name: 'mattermost'
+    static_configs:
+      - targets: ['mattermost:8067']
+    metrics_path: /metrics
+
+  # PostgreSQL Cluster (pg1, pg2, pg3)
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['192.168.2.8:9187']
+        labels:
+          instance: 'pg1'
+      - targets: ['192.168.2.9:9187']
+        labels:
+          instance: 'pg2'
+      - targets: ['192.168.2.10:9187']
+        labels:
+          instance: 'pg3'
+
+  # Node Exporter (Host Metrics)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['192.168.2.8:9100']
+        labels:
+          instance: 'pg1'
+      - targets: ['192.168.2.9:9100']
+        labels:
+          instance: 'pg2'
+      - targets: ['192.168.2.10:9100']
+        labels:
+          instance: 'pg3'
+
+  # HAProxy Metrics (pg1, pg2)
+  - job_name: 'haproxy'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['192.168.2.8:8404']
+        labels:
+          instance: 'pg1'
+      - targets: ['192.168.2.9:8404']
+        labels:
+          instance: 'pg2'
+
+  # Docker container metrics from cAdvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
