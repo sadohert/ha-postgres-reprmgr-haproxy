@@ -526,6 +526,80 @@ psql -h 192.168.87.100 -p 5000 -U repmgr -d repmgr \
 | Keepalived | VRRP | VIP management |
 | repmgrd | - | Failover daemon |
 
+---
+
+## Phase 8: Monitoring Configuration (All Nodes)
+
+### 8.1 Install Exporters
+Execute on all database nodes (`pg1`, `pg2`, `pg3`):
+
+```bash
+# Install Prometheus Node Exporter (System Metrics)
+sudo apt install -y prometheus-node-exporter
+
+# Install Prometheus Postgres Exporter (DB Metrics)
+sudo apt install -y prometheus-postgres-exporter
+```
+
+### 8.2 Configure Postgres Exporter
+The exporter needs a user with monitoring privileges.
+
+1.  **Create Monitoring User** (Execute on **Primary** only):
+    ```bash
+    sudo -u postgres psql -c "CREATE USER postgres_exporter PASSWORD 'password' IN ROLE pg_monitor;"
+    ```
+
+2.  **Configure Exporter** (Execute on **All Nodes**):
+    Edit `/etc/default/prometheus-postgres-exporter`:
+    ```ini
+    DATA_SOURCE_NAME="postgresql://postgres_exporter:password@localhost:5432/postgres?sslmode=disable"
+    ```
+
+3.  **Restart Service**:
+    ```bash
+    sudo systemctl restart prometheus-postgres-exporter
+    ```
+
+### 8.3 Enable HAProxy Stats
+To visualize HAProxy metrics, enable the statistics endpoint on each node.
+
+Edit `/etc/haproxy/haproxy.cfg` and append to the `global` or `defaults` section, or add as a new listener:
+
+```haproxy
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /metrics
+    stats refresh 10s
+    stats admin if LOCAL
+```
+
+Restart HAProxy:
+```bash
+sudo systemctl restart haproxy
+```
+
+---
+
+## Phase 9: Mattermost Configuration
+
+### 9.1 Replica Lag Settings
+To enable the "Replica Lag" panel in the Mattermost Performance Dashboard, configure `ReplicaLagSettings` in `config.json`. This should point to the **Write VIP** (`192.168.87.100`) so it can query the primary for replication status.
+
+In `config.json` under `SqlSettings`:
+
+```json
+"ReplicaLagSettings": [
+    {
+        "DataSource": "postgres://mattermost:mattermost@192.168.87.100:5000/mattermost?sslmode=disable&connect_timeout=10",
+        "QueryAbsoluteLag": "select usename, pg_wal_lsn_diff(pg_current_wal_lsn(),replay_lsn) as metric from pg_stat_replication;",
+        "QueryTimeLag": null
+    }
+]
+```
+
+> **Note**: This query calculates the byte lag between the current WAL LSN on the primary and the replay LSN of the replicas.
+
 ## Next Steps
 
 - Review [Operations Guide](03-operations-guide.md) for day-to-day procedures

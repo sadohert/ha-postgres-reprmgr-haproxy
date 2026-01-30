@@ -591,7 +591,7 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 8,
+                "w": 12,
                 "x": 0,
                 "y": 37
             },
@@ -629,8 +629,8 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 8,
-                "x": 8,
+                "w": 12,
+                "x": 12,
                 "y": 37
             },
             "id": 9,
@@ -658,7 +658,10 @@
                 }
             ],
             "title": "Total Database Size",
-            "type": "timeseries"
+            "type": "timeseries",
+            "fieldConfig": {
+                "defaults": {}
+            }
         },
         {
             "datasource": {
@@ -667,15 +670,17 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 37
+                "w": 24,
+                "x": 0,
+                "y": 45
             },
             "id": 16,
             "options": {
                 "legend": {
-                    "calcs": [],
-                    "displayMode": "table",
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "displayMode": "list",
                     "placement": "bottom",
                     "showLegend": true
                 },

@@ -9,6 +9,16 @@
   * Reduces inter-node latency (important for realtime workloads with no cluster affinity)
   * Implementation: Add `check_primary.sh` script using `/master` endpoint with high weight in Keepalived
   * Trade-off: VIP moves on every DB failover (not just node failures)
+* Loki for log aggregation
+
+# Future Work: Infrastructure & Scale
+* **AWS HA Postgres Design (Terraform)**:
+  * Port this local `multipass` HA design to AWS.
+  * Document variances from the reference design.
+  * Use Terraform for provisioning.
+* **Load Testing at Scale**:
+  * Run Mattermost load tests against the AWS environment.
+  * Validate performance at higher scale.
 
 # Validation
 * Load Test
