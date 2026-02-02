@@ -2,7 +2,10 @@
 
 The goal of this project is to design a **PostgreSQL High Availability (HA)** cluster architecture suitable for **SMB/Mid-Market** businesses.
 This design prioritizes **risk mitigation**, **cost-effectiveness**, and **ease of maintenance** while meeting production Mattermost workload requirements.
-Mattermost recommendations for infrastructure sizing are here - https://docs.mattermost.com/administration-guide/scale/scale-to-2000-users.html (the 2000 users is a good estimate of the highest this solution is intended to serve)
+
+> [!IMPORTANT]
+> **Context**: While the architecture is designed for production, the **Terraform** automation in this repository is specifically for **certification** (sizing, performance, maintenance/ops, and automated recovery validation) and **load testing**.
+> In real-world customer deployments, the cluster is often "hand-assembled" (e.g., on VMWare or Bare Metal).
 
 **Target Outcome**: This work will be published as an official guide on [docs.mattermost.com](https://docs.mattermost.com). All configurations and scripts should be production-ready and documented for external customers.
 
@@ -59,9 +62,10 @@ sudo -u postgres repmgr standby switchover -f /etc/repmgr.conf --siblings-follow
 sudo -u postgres repmgr node rejoin -f /etc/repmgr.conf -d 'host=<PRIMARY_IP> dbname=repmgr user=repmgr' --force-rewind
 ```
 
-## Terraform & Infrastructure Rules
+## Terraform & Infrastructure Rules (Certification/Load Testing)
 
-1.  **Persistence & Upgrades**: When performing major version upgrades (e.g., Postgres 16 -> 17) or significant `user_data` logic changes, **ALWAYS** taint the compute and storage resources (`terraform taint`) to ensure a clean slate. In-place updates often fail to re-bootstrap stateful components.
+1.  **Purpose**: Terraform is used to provision ephemeral environments for **certification** of the HA architecture (validating performance, failover, etc.). It should not be assumed as the only deployment method.
+2.  **Persistence & Upgrades**: When performing major version upgrades (e.g., Postgres 16 -> 17) or significant `user_data` logic changes, **ALWAYS** taint the compute and storage resources (`terraform taint`) to ensure a clean slate. In-place updates often fail to re-bootstrap stateful components.
 2.  **Shell Safety**: Use **alphanumeric-only** strings for infrastructure credentials (passwords) passed to `user_data`. Special characters (like `!`) cause shell escaping issues during cloud-init.
 3.  **Connectivity**:
     -   Default Load Balancers and Services to **internal** for security.

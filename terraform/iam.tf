@@ -17,23 +17,16 @@ resource "aws_iam_role" "db_role" {
   })
 }
 
-resource "aws_iam_role_policy" "db_policy" {
-  name = "ha-postgres-policy"
-  role = aws_iam_role.db_role.id
+# EC2 Describe and Tags policies removed (Static discovery implemented)
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ec2:DescribeInstances",
-          "ec2:DescribeTags"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
+resource "aws_iam_role_policy_attachment" "ec2_read" {
+  role       = aws_iam_role.db_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_policy" {
+  role       = aws_iam_role.db_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_instance_profile" "db_profile" {

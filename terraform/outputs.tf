@@ -6,9 +6,9 @@ output "vpc_id" {
 output "db_node_public_ips" {
   description = "Public IPs of the Database Nodes"
   value       = {
-    pg1 = aws_instance.db_nodes[0].public_ip
-    pg2 = aws_instance.db_nodes[1].public_ip
-    pg3 = aws_instance.db_nodes[2].public_ip
+    pg1 = aws_instance.primary.public_ip
+    pg2 = aws_instance.standbys[0].public_ip
+    pg3 = aws_instance.standbys[1].public_ip
   }
 }
 

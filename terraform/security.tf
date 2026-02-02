@@ -16,20 +16,20 @@ resource "aws_security_group" "db_nodes" {
 
   # HAProxy Write Port
   ingress {
-    description = "HAProxy Write Port from VPC"
+    description = "HAProxy Write Port from Admin/External/AppServer"
     from_port   = 5000
     to_port     = 5000
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.default.cidr_block]
+    cidr_blocks = [var.admin_cidr, data.aws_vpc.default.cidr_block, "54.162.208.25/32"]
   }
 
   # HAProxy Read Port
   ingress {
-    description = "HAProxy Read Port from VPC"
+    description = "HAProxy Read Port from Admin/External/AppServer"
     from_port   = 5001
     to_port     = 5001
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.default.cidr_block]
+    cidr_blocks = [var.admin_cidr, data.aws_vpc.default.cidr_block, "54.162.208.25/32"]
   }
 
   # PostgreSQL Direct (for checking/monitoring)

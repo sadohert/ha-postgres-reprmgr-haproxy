@@ -55,7 +55,7 @@
                         "type": "prometheus",
                         "uid": "prometheus"
                     },
-                    "expr": "count(pg_up{instance=~\"$instance\", job=\"postgresql\"} == 1)",
+                    "expr": "count(pg_up{instance=~\"$instance\", job=\"postgres\"} == 1)",
                     "refId": "A"
                 }
             ],

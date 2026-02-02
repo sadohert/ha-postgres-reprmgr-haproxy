@@ -27,7 +27,7 @@ variable "admin_cidr" {
 variable "db_password" {
   description = "Password for the 'postgres' superuser"
   type        = string
-  default     = "Sausage-Bacon-123!" # Odd, static, and delicious
+  default     = "SausageBacon123" # Updated to be shell-safe (alphanumeric)
   sensitive   = true
 }
 
@@ -42,5 +42,12 @@ variable "monitor_password" {
   description = "Password for the 'postgres_exporter' user"
   type        = string
   default     = "Eye-Of-Sauron-See-All!"
+  sensitive   = true
+}
+
+variable "mm_password" {
+  description = "Password for the Mattermost database user"
+  type        = string
+  default     = "SausageBacon123"
   sensitive   = true
 }

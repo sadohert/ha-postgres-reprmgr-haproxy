@@ -36,6 +36,8 @@ scrape_configs:
         filters:
           - name: tag:Role
             values: [postgres-node]
+          - name: instance-state-name
+            values: [running]
     relabel_configs:
       - source_labels: [__meta_ec2_tag_Name]
         target_label: instance
@@ -47,6 +49,8 @@ scrape_configs:
         filters:
           - name: tag:Role
             values: [postgres-node]
+          - name: instance-state-name
+            values: [running]
     relabel_configs:
       - source_labels: [__meta_ec2_tag_Name]
         target_label: instance
@@ -59,6 +63,8 @@ scrape_configs:
         filters:
           - name: tag:Role
             values: [postgres-node]
+          - name: instance-state-name
+            values: [running]
     relabel_configs:
       - source_labels: [__meta_ec2_tag_Name]
         target_label: instance

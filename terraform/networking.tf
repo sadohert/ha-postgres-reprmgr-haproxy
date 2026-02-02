@@ -2,7 +2,7 @@
 
 resource "aws_lb" "ha_postgres" {
   name               = "ha-postgres-nlb"
-  internal           = true # Critical: Internal LB, not public
+  internal           = false # Critical: Allow external access for user's laptop
   load_balancer_type = "network"
   subnets            = data.aws_subnets.default.ids
 
@@ -86,16 +86,30 @@ resource "aws_lb_listener" "pg_read" {
 # Attach ALL nodes to BOTH target groups.
 # The Health Checks determine routing logic dynamically.
 
-resource "aws_lb_target_group_attachment" "pg_write" {
-  count            = 3
+# Attach Primary to both (it handles both write and read if needed, though pgchk controls routing)
+resource "aws_lb_target_group_attachment" "primary_write" {
   target_group_arn = aws_lb_target_group.pg_write.arn
-  target_id        = aws_instance.db_nodes[count.index].id
-  port             = 5000 # Forward to HAProxy on the node
+  target_id        = aws_instance.primary.id
+  port             = 5000
 }
 
-resource "aws_lb_target_group_attachment" "pg_read" {
-  count            = 3
+resource "aws_lb_target_group_attachment" "primary_read" {
   target_group_arn = aws_lb_target_group.pg_read.arn
-  target_id        = aws_instance.db_nodes[count.index].id
-  port             = 5001 # Forward to HAProxy on the node
+  target_id        = aws_instance.primary.id
+  port             = 5001
+}
+
+# Attach Standbys to both
+resource "aws_lb_target_group_attachment" "standby_write" {
+  count            = 2
+  target_group_arn = aws_lb_target_group.pg_write.arn
+  target_id        = aws_instance.standbys[count.index].id
+  port             = 5000
+}
+
+resource "aws_lb_target_group_attachment" "standby_read" {
+  count            = 2
+  target_group_arn = aws_lb_target_group.pg_read.arn
+  target_id        = aws_instance.standbys[count.index].id
+  port             = 5001
 }
