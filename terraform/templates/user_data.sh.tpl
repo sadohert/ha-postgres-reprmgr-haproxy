@@ -171,6 +171,7 @@ else
 node_id=$NODE_ID
 node_name='pg$NODE_ID'
 conninfo='host=$(hostname -I | awk "{print \$1}") user=repmgr dbname=repmgr connect_timeout=2'
+ssh_options='-o StrictHostKeyChecking=no'
 data_directory='/var/lib/postgresql/17/main'
 use_replication_slots=yes
 service_start_command='sudo /usr/bin/pg_ctlcluster 17 main start'

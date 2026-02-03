@@ -14,6 +14,15 @@ resource "aws_security_group" "db_nodes" {
     cidr_blocks      = [var.admin_cidr]
   }
 
+  # Internal SSH
+  ingress {
+    description      = "SSH from Internal Cluster"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    self             = true
+  }
+
   # HAProxy Write Port
   ingress {
     description      = "HAProxy Write Port from Admin/External/AppServer"
