@@ -12,7 +12,7 @@ echo "127.0.0.1 ${hostname}" >> /etc/hosts
 apt-get update
 apt-get install -y curl ca-certificates
 install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor --yes -o /etc/apt/keyrings/postgresql.gpg
 echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 
 # Install Packages and Setup Volume
@@ -24,9 +24,13 @@ apt-get install -y postgresql-common
 
 # Mount Data Volume
 while [ ! -e /dev/nvme1n1 ]; do sleep 1; done
-mkfs.xfs -f /dev/nvme1n1
+if ! blkid /dev/nvme1n1; then
+    mkfs.xfs -f /dev/nvme1n1
+fi
 mkdir -p /var/lib/postgresql
-echo "/dev/nvme1n1 /var/lib/postgresql xfs defaults 0 0" >> /etc/fstab
+if ! grep -q "/dev/nvme1n1" /etc/fstab; then
+    echo "/dev/nvme1n1 /var/lib/postgresql xfs defaults 0 0" >> /etc/fstab
+fi
 mount -a
 
 # Ensure volume is clean for initdb
@@ -158,11 +162,14 @@ EOF
 else
     echo "I am STANDBY (Node $NODE_ID). Primay is at $PRIMARY_IP"
     
-    # Poll for Primary availability
-    while ! nc -z $PRIMARY_IP 5432; do   
-      echo "Waiting for Postgres on $PRIMARY_IP..."
+    # Poll for Primary availability AND repmgr user existence
+    # We use the repmgr user to check, ensuring the Primary has finished its bootstrap
+    export PGPASSWORD='${repmgr_password}'
+    until psql -h $PRIMARY_IP -U repmgr -d repmgr -c "SELECT 1" >/dev/null 2>&1; do
+      echo "Waiting for Primary ($PRIMARY_IP) to be ready and repmgr user to exist..."
       sleep 5
     done
+    unset PGPASSWORD
     
     systemctl stop postgresql
     rm -rf /var/lib/postgresql/17/main/*
