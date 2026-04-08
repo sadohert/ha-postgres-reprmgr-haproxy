@@ -43,7 +43,7 @@ resource "aws_security_group" "monitor_sg" {
     from_port   = 3100
     to_port     = 3100
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.default.cidr_block]
+    cidr_blocks = [for s in data.aws_vpc.default.cidr_block_associations : s.cidr_block]
   }
 
 
