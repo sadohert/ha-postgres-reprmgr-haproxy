@@ -62,3 +62,9 @@ variable "extra_security_group_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "dc2_enabled" {
+  description = "Provision DC2 warm standby nodes (node4/5/6 with cascading replication from DC1 primary)"
+  type        = bool
+  default     = false
+}
