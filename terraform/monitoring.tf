@@ -133,3 +133,33 @@ resource "null_resource" "monitor_dashboards" {
 
   depends_on = [aws_instance.monitor]
 }
+
+resource "null_resource" "dc2_prometheus_scrape" {
+  count = var.dc2_enabled ? 1 : 0
+
+  triggers = {
+    upstream_ip  = aws_instance.dc2_upstream[0].private_ip
+    standby_ips  = join(",", [for inst in aws_instance.dc2_standbys : inst.private_ip])
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = tls_private_key.admin_ssh.private_key_openssh
+    host        = aws_instance.monitor.public_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "printf '\\n  - job_name: postgres-dc2\\n    static_configs:\\n      - targets:\\n          - \"${aws_instance.dc2_upstream[0].private_ip}:9100\"\\n          - \"${aws_instance.dc2_standbys[0].private_ip}:9100\"\\n          - \"${aws_instance.dc2_standbys[1].private_ip}:9100\"\\n          - \"${aws_instance.dc2_upstream[0].private_ip}:9187\"\\n          - \"${aws_instance.dc2_standbys[0].private_ip}:9187\"\\n          - \"${aws_instance.dc2_standbys[1].private_ip}:9187\"\\n        labels:\\n          dc: dc2\\n' > /tmp/dc2_scrape_fragment.yml",
+      "grep -q 'postgres-dc2' /opt/monitoring/prometheus/prometheus.yml || sudo tee -a /opt/monitoring/prometheus/prometheus.yml < /tmp/dc2_scrape_fragment.yml",
+      "sudo docker compose -f /opt/monitoring/docker-compose.yml restart prometheus",
+    ]
+  }
+
+  depends_on = [
+    aws_instance.dc2_upstream,
+    aws_instance.dc2_standbys,
+    null_resource.monitor_dashboards,
+  ]
+}
