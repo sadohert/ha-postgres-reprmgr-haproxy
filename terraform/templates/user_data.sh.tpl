@@ -205,6 +205,7 @@ pg_bindir='/usr/lib/postgresql/17/bin'
 
 data_directory='/var/lib/postgresql/17/main'
 use_replication_slots=yes
+location=dc1
 service_start_command='sudo /usr/bin/pg_ctlcluster 17 main start'
 service_stop_command='sudo /usr/bin/pg_ctlcluster 17 main stop'
 service_restart_command='sudo /usr/bin/pg_ctlcluster 17 main restart'
@@ -253,6 +254,7 @@ pg_bindir='/usr/lib/postgresql/17/bin'
 ssh_options='-o StrictHostKeyChecking=no'
 data_directory='/var/lib/postgresql/17/main'
 use_replication_slots=yes
+location=dc1
 service_start_command='sudo /usr/bin/pg_ctlcluster 17 main start'
 service_stop_command='sudo /usr/bin/pg_ctlcluster 17 main stop'
 service_restart_command='sudo /usr/bin/pg_ctlcluster 17 main restart'
