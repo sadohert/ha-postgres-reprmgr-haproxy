@@ -150,9 +150,12 @@ resource "null_resource" "dc2_prometheus_scrape" {
   }
 
   provisioner "remote-exec" {
+    # Per-target static_configs give each node an explicit instance label so
+    # the Grafana dashboard resolves pg4/5/6 by hostname rather than raw IP.
     inline = [
-      "printf '\\n  - job_name: postgres-dc2\\n    static_configs:\\n      - targets:\\n          - \"${aws_instance.dc2_upstream[0].private_ip}:9100\"\\n          - \"${aws_instance.dc2_standbys[0].private_ip}:9100\"\\n          - \"${aws_instance.dc2_standbys[1].private_ip}:9100\"\\n          - \"${aws_instance.dc2_upstream[0].private_ip}:9187\"\\n          - \"${aws_instance.dc2_standbys[0].private_ip}:9187\"\\n          - \"${aws_instance.dc2_standbys[1].private_ip}:9187\"\\n        labels:\\n          dc: dc2\\n' > /tmp/dc2_scrape_fragment.yml",
-      "grep -q 'postgres-dc2' /opt/monitoring/prometheus/prometheus.yml || sudo tee -a /opt/monitoring/prometheus/prometheus.yml < /tmp/dc2_scrape_fragment.yml",
+      "printf '\\n  - job_name: postgres-dc2\\n    static_configs:\\n      - targets: [\"${aws_instance.dc2_upstream[0].private_ip}:9100\",\"${aws_instance.dc2_upstream[0].private_ip}:9187\"]\\n        labels:\\n          dc: dc2\\n          instance: pg4\\n      - targets: [\"${aws_instance.dc2_standbys[0].private_ip}:9100\",\"${aws_instance.dc2_standbys[0].private_ip}:9187\"]\\n        labels:\\n          dc: dc2\\n          instance: pg5\\n      - targets: [\"${aws_instance.dc2_standbys[1].private_ip}:9100\",\"${aws_instance.dc2_standbys[1].private_ip}:9187\"]\\n        labels:\\n          dc: dc2\\n          instance: pg6\\n' > /tmp/dc2_scrape_fragment.yml",
+      "sudo sed -i '/^  - job_name: postgres-dc2/,$d' /opt/monitoring/prometheus/prometheus.yml",
+      "sudo tee -a /opt/monitoring/prometheus/prometheus.yml < /tmp/dc2_scrape_fragment.yml",
       "sudo docker compose -f /opt/monitoring/docker-compose.yml restart prometheus",
     ]
   }
