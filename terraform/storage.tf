@@ -48,3 +48,41 @@ resource "aws_volume_attachment" "standby_data_attach" {
   volume_id   = aws_ebs_volume.standby_data[count.index].id
   instance_id = aws_instance.standbys[count.index].id
 }
+
+# --- DC2 EBS Data Volumes ---
+
+resource "aws_ebs_volume" "dc2_upstream_data" {
+  count             = var.dc2_enabled ? 1 : 0
+  availability_zone = data.aws_subnet.selected_primary.availability_zone
+  size              = 50
+  type              = "gp3"
+
+  tags = {
+    Name = "pg4-data"
+  }
+}
+
+resource "aws_volume_attachment" "dc2_upstream_data_attach" {
+  count       = var.dc2_enabled ? 1 : 0
+  device_name = "/dev/sdf"
+  volume_id   = aws_ebs_volume.dc2_upstream_data[0].id
+  instance_id = aws_instance.dc2_upstream[0].id
+}
+
+resource "aws_ebs_volume" "dc2_standby_data" {
+  count             = var.dc2_enabled ? 2 : 0
+  availability_zone = data.aws_subnet.selected_standby[count.index].availability_zone
+  size              = 50
+  type              = "gp3"
+
+  tags = {
+    Name = "pg${count.index + 5}-data"
+  }
+}
+
+resource "aws_volume_attachment" "dc2_standby_data_attach" {
+  count       = var.dc2_enabled ? 2 : 0
+  device_name = "/dev/sdf"
+  volume_id   = aws_ebs_volume.dc2_standby_data[count.index].id
+  instance_id = aws_instance.dc2_standbys[count.index].id
+}
