@@ -22,3 +22,6 @@ terraform.rc
 
 # Keys
 *.pem
+
+# Worktrees
+.worktrees/
