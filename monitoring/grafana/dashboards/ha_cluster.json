@@ -45,6 +45,86 @@
       "type": "row"
     },
     {
+      "id": 34,
+      "type": "stat",
+      "title": "DC1 Node Health",
+      "description": "Prometheus scrape target health (up=1 means Prometheus can reach the postgres_exporter). If scraping fails, all other metrics for that node are stale or absent.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "UNREACHABLE",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "REACHABLE",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "up{instance=~\"$dc1_nodes\", job=\"postgres\"}",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -101,7 +181,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 5
       },
       "id": 30,
       "options": {
@@ -171,7 +251,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 7
       },
       "id": 31,
       "options": {
@@ -255,7 +335,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 12
       },
       "id": 28,
       "options": {
