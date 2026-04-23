@@ -1562,28 +1562,142 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
-        },
-        "definition": "label_values(pg_up, instance)",
         "hide": 0,
         "includeAll": true,
         "label": "DB Host",
         "multi": true,
         "name": "db_host",
-        "options": [],
-        "query": {
-          "query": "label_values(pg_up, instance)"
-        },
-        "refresh": 1,
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": true,
+            "text": "pg1",
+            "value": "pg1"
+          },
+          {
+            "selected": true,
+            "text": "pg2",
+            "value": "pg2"
+          },
+          {
+            "selected": true,
+            "text": "pg3",
+            "value": "pg3"
+          },
+          {
+            "selected": true,
+            "text": "pg4",
+            "value": "pg4"
+          },
+          {
+            "selected": true,
+            "text": "pg5",
+            "value": "pg5"
+          },
+          {
+            "selected": true,
+            "text": "pg6",
+            "value": "pg6"
+          }
+        ],
+        "query": "pg1,pg2,pg3,pg4,pg5,pg6",
         "regex": "",
         "skipUrlSync": false,
-        "type": "query"
+        "type": "custom"
+      },
+      {
+        "name": "dc1_nodes",
+        "label": "DC1 Nodes",
+        "type": "custom",
+        "query": "pg1,pg2,pg3",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": true,
+            "text": "pg1",
+            "value": "pg1"
+          },
+          {
+            "selected": true,
+            "text": "pg2",
+            "value": "pg2"
+          },
+          {
+            "selected": true,
+            "text": "pg3",
+            "value": "pg3"
+          }
+        ],
+        "includeAll": true,
+        "multi": true,
+        "hide": 2,
+        "skipUrlSync": false
+      },
+      {
+        "name": "dc2_nodes",
+        "label": "DC2 Nodes",
+        "type": "custom",
+        "query": "pg4,pg5,pg6",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": true,
+            "text": "pg4",
+            "value": "pg4"
+          },
+          {
+            "selected": true,
+            "text": "pg5",
+            "value": "pg5"
+          },
+          {
+            "selected": true,
+            "text": "pg6",
+            "value": "pg6"
+          }
+        ],
+        "includeAll": true,
+        "multi": true,
+        "hide": 2,
+        "skipUrlSync": false
       },
       {
         "current": {
