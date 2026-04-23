@@ -1758,8 +1758,8 @@
         {
           "id": 37,
           "type": "timeseries",
-          "title": "DC2 Internal Lag: Upstream vs Standbys (LSN bytes)",
-          "description": "WAL positions of all DC2 nodes. Convergence = all lines at the same value. Divergence shows pg5/pg6 falling behind pg4.",
+          "title": "DC2 Internal Lag: Upstream \u2192 Standbys (LSN bytes)",
+          "description": "WAL bytes each DC2 standby (pg5, pg6) is behind the DC2 upstream (pg4). Uses clamp_min to avoid negative values during brief window when pg4 lags behind standbys.",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -1795,18 +1795,9 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "avg by(instance)(pg_wal_position_lsn_bytes{instance=\"pg4\", job=\"postgres\"})",
-              "legendFormat": "pg4 (upstream)",
+              "expr": "clamp_min(\n  avg by(instance)(pg_wal_position_lsn_bytes{instance=\"pg4\", job=\"postgres\"})\n  - avg by(instance)(pg_wal_position_lsn_bytes{instance=~\"pg5|pg6\", job=\"postgres\"}),\n  0\n)",
+              "legendFormat": "{{instance}} lag behind pg4",
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "avg by(instance)(pg_wal_position_lsn_bytes{instance=~\"pg5|pg6\", job=\"postgres\"})",
-              "legendFormat": "{{instance}}",
-              "refId": "B"
             }
           ]
         }

@@ -2,7 +2,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TERRAFORM_DIR="/Users/stu/development/ha-postgres-reprmgr-haproxy/terraform"
+# terraform.tfstate only exists in the main repo checkout — run from there, not from a worktree
+TERRAFORM_DIR="$REPO_ROOT/terraform"
 SSH_KEY="$TERRAFORM_DIR/ha-postgres-admin-key.pem"
 MONITOR_HOST="18.234.178.155"
 GRAFANA_PASS=$(cd "$TERRAFORM_DIR" && terraform output -raw grafana_admin_password)
