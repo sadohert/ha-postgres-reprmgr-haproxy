@@ -42,19 +42,12 @@ Confirm success by listing the worktree:
 git worktree list
 ```
 
-## Step 4: Remind the user how to open a session
+## Step 4: Confirm and summarise
 
-Tell the user:
+Tell the user the worktree is ready:
 
-> Worktree created at `.worktrees/<slug>` on branch `<branch>`.
->
-> To start a Claude Code session scoped to this issue:
-> ```bash
-> claude --add-dir /Users/stu/development/ha-postgres-reprmgr-haproxy/.worktrees/<slug>
-> ```
-> Or open it as a folder in VS Code and start Claude Code there.
->
-> The session will inherit `CLAUDE.md` from the branch, which includes the current implementation state and open issues — no need to re-explain context.
+> Worktree `.worktrees/<slug>` created on branch `<branch>`.
+> You can work on it directly in this session, or open it as a separate folder in VS Code for a dedicated Claude Code session there.
 
 ## Step 5: Optionally assign the issue
 
