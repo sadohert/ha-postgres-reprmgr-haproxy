@@ -1,63 +1,73 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# terraform.tfstate is gitignored — it only exists in the main repo, not this worktree
 TERRAFORM_DIR="/Users/stu/development/ha-postgres-reprmgr-haproxy/terraform"
+SSH_KEY="$TERRAFORM_DIR/ha-postgres-admin-key.pem"
+MONITOR_HOST="18.234.178.155"
 GRAFANA_PASS=$(cd "$TERRAFORM_DIR" && terraform output -raw grafana_admin_password)
+
 WORKING_COPY="$REPO_ROOT/docs/grafana/ha-cluster-dashboard.json"
 PROVISIONING="$REPO_ROOT/monitoring/grafana/dashboards/ha_cluster.json"
 DASHBOARD_FILE="${1:-$WORKING_COPY}"
 
-# Push to Grafana
-PAYLOAD=$(python3 -c "
-import json, sys
+# Step 1: Sync working copy (if caller passed a different file, copy it in)
+if [[ "$DASHBOARD_FILE" != "$WORKING_COPY" ]]; then
+    python3 -c "
+import json
 with open('$DASHBOARD_FILE') as f:
-    db = json.load(f)
-if 'dashboard' in db:
-    db = db['dashboard']
-db.pop('version', None)
-db.pop('id', None)
-print(json.dumps({'dashboard': db, 'overwrite': True, 'folderId': 0}))
-")
-
-RESULT=$(curl -s -X POST \
-  -u "admin:${GRAFANA_PASS}" \
-  -H "Content-Type: application/json" \
-  -d "$PAYLOAD" \
-  "http://18.234.178.155:3000/api/dashboards/db")
-
-echo "$RESULT" | python3 -m json.tool
-echo "$RESULT" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('status')=='success' else 1)"
-
-# Sync working copy and provisioning file from what was just pushed
-GRAFANA_PASS="$GRAFANA_PASS" python3 -c "
-import json, urllib.request, base64, os, sys
-
-creds = base64.b64encode(f\"admin:{os.environ['GRAFANA_PASS']}\".encode()).decode()
-req = urllib.request.Request(
-    'http://18.234.178.155:3000/api/dashboards/uid/mattermost-ha-cluster',
-    headers={'Authorization': f'Basic {creds}'}
-)
-try:
-    with urllib.request.urlopen(req) as resp:
-        live = json.loads(resp.read())['dashboard']
-except Exception as e:
-    print(f'ERROR: Failed to fetch dashboard from Grafana: {e}', file=sys.stderr)
-    raise
-
-# Save working copy (raw dashboard JSON)
+    d = json.load(f)
+if 'dashboard' in d:
+    d = d['dashboard']
 with open('$WORKING_COPY', 'w') as f:
-    json.dump(live, f, indent=2)
+    json.dump(d, f, indent=2)
+print('Working copy updated from $DASHBOARD_FILE')
+"
+fi
 
-# Save provisioning file — must include __inputs for Grafana import compatibility
+# Step 2: Sync provisioning file (working copy + __inputs)
+python3 -c "
+import json
+
+with open('$WORKING_COPY') as f:
+    live = json.load(f)
+
 INPUTS = [{'name': 'DS_PROMETHEUS', 'label': 'Prometheus', 'description': '',
            'type': 'datasource', 'pluginId': 'prometheus', 'pluginName': 'Prometheus'}]
 provisioning = {'__inputs': INPUTS}
 provisioning.update(live)
+
 with open('$PROVISIONING', 'w') as f:
     json.dump(provisioning, f, indent=2)
 
-print(f'Synced: {len(live[\"panels\"])} panels')
-print(f'  Working copy: $WORKING_COPY')
-print(f'  Provisioning: $PROVISIONING')
+print(f'Provisioning file synced: {len(live[\"panels\"])} panels')
 "
+
+# Step 3: SCP provisioning file to monitor server
+echo "SCPing provisioning file to $MONITOR_HOST..."
+scp -i "$SSH_KEY" -o StrictHostKeyChecking=no \
+    "$PROVISIONING" \
+    "ubuntu@${MONITOR_HOST}:/opt/monitoring/grafana/dashboards/ha_cluster.json"
+
+# Step 4: Reload Grafana provisioning
+echo "Reloading Grafana provisioning..."
+RELOAD_RESULT=$(GRAFANA_PASS="$GRAFANA_PASS" python3 -c "
+import urllib.request, urllib.error, os, json
+
+grafana_pass = os.environ['GRAFANA_PASS']
+import base64
+creds = base64.b64encode(f'admin:{grafana_pass}'.encode()).decode()
+req = urllib.request.Request(
+    'http://18.234.178.155:3000/api/admin/provisioning/dashboards/reload',
+    method='POST',
+    headers={'Authorization': f'Basic {creds}', 'Content-Length': '0'}
+)
+try:
+    with urllib.request.urlopen(req) as resp:
+        result = json.loads(resp.read())
+        print(result.get('message', 'OK'))
+except Exception as e:
+    print(f'ERROR: Grafana reload failed: {e}', file=__import__('sys').stderr)
+    raise
+")
+echo "Grafana reload: $RELOAD_RESULT"
