@@ -126,6 +126,7 @@ resource "aws_instance" "dc2_upstream" {
     node_id          = 4
     upstream_node_ip = aws_instance.primary.private_ip
     upstream_node_id = 1
+    primary_node_ip  = aws_instance.primary.private_ip
     hosts_entries    = join("\n", [
       "${aws_instance.primary.private_ip} pg1",
       "${aws_instance.standbys[0].private_ip} pg2",
@@ -172,6 +173,7 @@ resource "aws_instance" "dc2_standbys" {
     node_id          = count.index + 5
     upstream_node_ip = aws_instance.dc2_upstream[0].private_ip
     upstream_node_id = 4
+    primary_node_ip  = aws_instance.primary.private_ip
     hosts_entries    = join("\n", [
       "${aws_instance.primary.private_ip} pg1",
       "${aws_instance.standbys[0].private_ip} pg2",

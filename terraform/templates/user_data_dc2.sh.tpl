@@ -86,6 +86,16 @@ pg_replication_lag_detailed:
     - replay_lag_seconds:
         usage: "GAUGE"
         description: "Time waiting for WAL to be replayed"
+
+pg_wal_position:
+  query: "SELECT CASE WHEN pg_is_in_recovery() THEN 'replica' ELSE 'primary' END AS node_role, pg_wal_lsn_diff(CASE WHEN pg_is_in_recovery() THEN pg_last_wal_replay_lsn() ELSE pg_current_wal_lsn() END, '0/0') AS lsn_bytes"
+  metrics:
+    - node_role:
+        usage: "LABEL"
+        description: "primary or replica"
+    - lsn_bytes:
+        usage: "GAUGE"
+        description: "WAL position as bytes from origin: pg_current_wal_lsn on primary, pg_last_wal_replay_lsn on replica. Used to compute lag when standby is fully disconnected from pg_stat_replication."
 EOF
 systemctl restart prometheus-postgres-exporter
 
@@ -156,6 +166,7 @@ echo "Bootstrapping DC2 Standby..."
 NODE_ID=${node_id}
 UPSTREAM_NODE_IP="${upstream_node_ip}"
 UPSTREAM_NODE_ID=${upstream_node_id}
+PRIMARY_NODE_IP="${primary_node_ip}"
 
 # Poll upstream node for repmgr initialization
 # Works for both node4 (polls DC1 primary) and nodes 5/6 (polls node4,
@@ -254,6 +265,34 @@ while [ $REGISTER_RETRY_COUNT -lt $REGISTER_MAX_RETRIES ]; do
     fi
   fi
 done
+
+# --- 4b. Cascading replication fix (pg5, pg6 only) ---
+# repmgr standby clone copies the source's primary_conninfo (pointing to pg1) rather
+# than rewriting it to point to the immediate upstream (pg4). Fix this explicitly.
+if [ "$NODE_ID" -ne 4 ]; then
+  echo "Fixing cascading replication for pg$NODE_ID: redirecting to stream from pg4 ($UPSTREAM_NODE_IP)..."
+
+  # Create replication slot on pg4 for this node (pg4's pg_hba uses trust for repmgr user)
+  sudo -u postgres psql -h $UPSTREAM_NODE_IP -U repmgr -d repmgr \
+    -c "SELECT pg_create_physical_replication_slot('repmgr_slot_$NODE_ID');" || true
+
+  # Override primary_conninfo to stream from pg4 instead of pg1
+  sudo -u postgres psql \
+    -c "ALTER SYSTEM SET primary_conninfo = 'host=$UPSTREAM_NODE_IP user=repmgr application_name=pg$NODE_ID connect_timeout=2';"
+
+  systemctl restart postgresql
+  until pg_isready; do
+    echo "Waiting for Postgres after cascading conninfo fix..."
+    sleep 2
+  done
+
+  # Drop the stale slot that repmgr created on pg1 during clone
+  # (repmgr user is superuser, pg1's pg_hba uses trust for repmgr@repmgr from VPC CIDR)
+  sudo -u postgres psql -h $PRIMARY_NODE_IP -U repmgr -d repmgr \
+    -c "SELECT pg_drop_replication_slot('repmgr_slot_$NODE_ID');" || true
+
+  echo "Cascading replication fix complete: pg$NODE_ID now streams from pg4."
+fi
 
 # Enable Repmgrd
 sed -i 's/REPMGRD_ENABLED=no/REPMGRD_ENABLED=yes/' /etc/default/repmgrd

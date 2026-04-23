@@ -94,6 +94,16 @@ pg_replication_lag_detailed:
     - replay_lag_seconds:
         usage: "GAUGE"
         description: "Time waiting for WAL to be replayed"
+
+pg_wal_position:
+  query: "SELECT CASE WHEN pg_is_in_recovery() THEN 'replica' ELSE 'primary' END AS node_role, pg_wal_lsn_diff(CASE WHEN pg_is_in_recovery() THEN pg_last_wal_replay_lsn() ELSE pg_current_wal_lsn() END, '0/0') AS lsn_bytes"
+  metrics:
+    - node_role:
+        usage: "LABEL"
+        description: "primary or replica"
+    - lsn_bytes:
+        usage: "GAUGE"
+        description: "WAL position as bytes from origin: pg_current_wal_lsn on primary, pg_last_wal_replay_lsn on replica. Used to compute lag when standby is fully disconnected from pg_stat_replication."
 EOF
 systemctl restart prometheus-postgres-exporter
 
