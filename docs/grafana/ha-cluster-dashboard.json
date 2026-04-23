@@ -1616,6 +1616,201 @@
       ],
       "title": "Node Presence",
       "type": "stat"
+    },
+    {
+      "id": 38,
+      "type": "row",
+      "title": "Cross-DC / DC2 Replication",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 76
+      },
+      "panels": [
+        {
+          "id": 35,
+          "type": "stat",
+          "title": "DC2 Node Health",
+          "description": "Prometheus scrape target health for DC2 nodes. UNREACHABLE means the monitoring server cannot reach the postgres_exporter \u2014 either the node is down or the cross-DC network path is broken.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "UNREACHABLE",
+                      "color": "red",
+                      "index": 0
+                    },
+                    "1": {
+                      "text": "REACHABLE",
+                      "color": "green",
+                      "index": 1
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "horizontal",
+            "textMode": "value_and_name",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "up{instance=~\"$dc2_nodes\", job=\"postgres\"}",
+              "legendFormat": "{{instance}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 36,
+          "type": "timeseries",
+          "title": "Cross-DC Lag: Primary \u2192 DC2 Upstream (LSN bytes)",
+          "description": "WAL bytes the DC2 upstream (pg4) is behind the DC1 primary. Remains populated even when the standby is fully disconnected from DC1 because it uses each node's local WAL position metric.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 4
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "clamp_min(\n  scalar(max(pg_wal_position_lsn_bytes{node_role=\"primary\", job=\"postgres\"}))\n  - avg by(instance)(pg_wal_position_lsn_bytes{instance=\"pg4\", node_role=\"replica\", job=\"postgres\"}),\n  0\n)",
+              "legendFormat": "pg4 lag behind primary",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 37,
+          "type": "timeseries",
+          "title": "DC2 Internal Lag: Upstream vs Standbys (LSN bytes)",
+          "description": "WAL positions of all DC2 nodes. Convergence = all lines at the same value. Divergence shows pg5/pg6 falling behind pg4.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 4
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "avg by(instance)(pg_wal_position_lsn_bytes{instance=\"pg4\", job=\"postgres\"})",
+              "legendFormat": "pg4 (upstream)",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "avg by(instance)(pg_wal_position_lsn_bytes{instance=~\"pg5|pg6\", job=\"postgres\"})",
+              "legendFormat": "{{instance}}",
+              "refId": "B"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preload": false,
