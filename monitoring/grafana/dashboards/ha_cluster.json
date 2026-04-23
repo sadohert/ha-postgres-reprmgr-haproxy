@@ -130,7 +130,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "pg_replication_is_replica{instance=\"$instance\"}",
+          "expr": "pg_replication_is_replica{job=\"postgres\",instance=\"$instance\"}",
           "instant": true,
           "legendFormat": "Role",
           "refId": "Role"
@@ -195,7 +195,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$instance\"}[1m])) * 100)",
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{job=\"postgres\",mode=\"idle\", instance=~\"$instance\"}[1m])) * 100)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "CPU"
@@ -284,7 +284,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "node_load1{instance=\"$instance\"}",
+          "expr": "node_load1{job=\"postgres\",instance=\"$instance\"}",
           "legendFormat": "Load",
           "refId": "Load"
         }
