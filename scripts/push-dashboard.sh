@@ -30,16 +30,20 @@ echo "$RESULT" | python3 -m json.tool
 echo "$RESULT" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('status')=='success' else 1)"
 
 # Sync working copy and provisioning file from what was just pushed
-python3 -c "
-import json, urllib.request, base64
+GRAFANA_PASS="$GRAFANA_PASS" python3 -c "
+import json, urllib.request, base64, os, sys
 
-creds = base64.b64encode(b'admin:${GRAFANA_PASS}').decode()
+creds = base64.b64encode(f\"admin:{os.environ['GRAFANA_PASS']}\".encode()).decode()
 req = urllib.request.Request(
     'http://18.234.178.155:3000/api/dashboards/uid/mattermost-ha-cluster',
     headers={'Authorization': f'Basic {creds}'}
 )
-with urllib.request.urlopen(req) as resp:
-    live = json.loads(resp.read())['dashboard']
+try:
+    with urllib.request.urlopen(req) as resp:
+        live = json.loads(resp.read())['dashboard']
+except Exception as e:
+    print(f'ERROR: Failed to fetch dashboard from Grafana: {e}', file=sys.stderr)
+    raise
 
 # Save working copy (raw dashboard JSON)
 with open('$WORKING_COPY', 'w') as f:
