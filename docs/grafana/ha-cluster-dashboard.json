@@ -692,7 +692,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "clamp_min(\n  avg by(instance)(pg_wal_position_lsn_bytes{instance=\"pg4\", job=\"postgres\"})\n  - avg by(instance)(pg_wal_position_lsn_bytes{instance=~\"pg5|pg6\", job=\"postgres\"}),\n  0\n)",
+              "expr": "clamp_min(\n  scalar(avg(pg_wal_position_lsn_bytes{instance=\"pg4\", job=\"postgres\"}))\n  - avg by(instance)(pg_wal_position_lsn_bytes{instance=~\"pg5|pg6\", job=\"postgres\"}),\n  0\n)",
               "legendFormat": "{{instance}} lag behind pg4",
               "refId": "A"
             }
