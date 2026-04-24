@@ -152,6 +152,10 @@
             "mode": "absolute",
             "steps": [
               {
+                "color": "red",
+                "value": null
+              },
+              {
                 "color": "green",
                 "value": 0
               },
@@ -167,7 +171,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 24,
+        "w": 8,
         "x": 0,
         "y": 5
       },
@@ -185,21 +189,22 @@
         },
         "showThresholdLabels": false,
         "showThresholdMarkers": true,
-        "sizing": "auto"
+        "sizing": "auto",
+        "noValue": "-1"
       },
       "pluginVersion": "12.3.2",
-      "repeat": "instance",
+      "repeat": "dc1_nodes",
       "repeatDirection": "h",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{job=\"postgres\",mode=\"idle\", instance=~\"$instance\"}[1m])) * 100)",
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{job=\"postgres\",mode=\"idle\", instance=~\"$dc1_nodes\"}[1m])) * 100)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "CPU"
         }
       ],
-      "title": "CPU: ${instance}",
+      "title": "CPU: ${dc1_nodes}",
       "type": "gauge"
     },
     {
