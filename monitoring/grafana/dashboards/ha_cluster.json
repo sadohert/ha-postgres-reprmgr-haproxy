@@ -47,17 +47,17 @@
     {
       "id": 34,
       "type": "stat",
-      "title": "Health: ${dc1_nodes}",
-      "description": "Prometheus scrape target health (up=1 means Prometheus can reach the postgres_exporter). If scraping fails, all other metrics for that node are stale or absent.",
+      "title": "${dc1_nodes}",
+      "description": "Card colour = health (up metric). Text = role (primary/replica).",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 8,
         "x": 0,
-        "y": 3
+        "y": 1
       },
       "fieldConfig": {
         "defaults": {
@@ -65,20 +65,25 @@
             {
               "type": "value",
               "options": {
-                "0": {
-                  "text": "DOWN",
-                  "color": "red",
-                  "index": 0
-                },
-                "1": {
-                  "text": "",
-                  "color": "green",
-                  "index": 1
-                },
                 "-1": {
                   "text": "NO DATA",
                   "color": "red",
+                  "index": 0
+                },
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 1
+                },
+                "1": {
+                  "text": "\ud83d\udc51 PRIMARY",
+                  "color": "semi-dark-green",
                   "index": 2
+                },
+                "2": {
+                  "text": "\ud83d\udccb REPLICA",
+                  "color": "semi-dark-blue",
+                  "index": 3
                 }
               }
             }
@@ -91,8 +96,12 @@
                 "value": null
               },
               {
-                "color": "green",
+                "color": "semi-dark-green",
                 "value": 1
+              },
+              {
+                "color": "semi-dark-blue",
+                "value": 2
               }
             ]
           },
@@ -112,7 +121,7 @@
           "values": false
         },
         "orientation": "horizontal",
-        "textMode": "none",
+        "textMode": "value",
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
@@ -124,9 +133,10 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "up{instance=\"$dc1_nodes\", job=\"postgres\"}",
-          "legendFormat": "Health",
-          "refId": "A"
+          "expr": "(pg_replication_is_replica{job=\"postgres\",instance=\"$dc1_nodes\"} + 1) * on(instance) up{instance=\"$dc1_nodes\", job=\"postgres\"}",
+          "legendFormat": "Status",
+          "refId": "A",
+          "instant": true
         }
       ],
       "repeat": "dc1_nodes",
@@ -168,7 +178,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 5
+        "y": 4
       },
       "id": 31,
       "options": {
@@ -201,116 +211,6 @@
       ],
       "title": "CPU: ${dc1_nodes}",
       "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Role"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "0": {
-                        "color": "semi-dark-green",
-                        "index": 1,
-                        "text": "\ud83d\udc51 PRIMARY"
-                      },
-                      "1": {
-                        "color": "semi-dark-blue",
-                        "index": 0,
-                        "text": "\ud83d\udcd1 REPLICA"
-                      }
-                    },
-                    "type": "value"
-                  },
-                  {
-                    "type": "value",
-                    "options": {
-                      "-1": {
-                        "color": "red",
-                        "index": 2,
-                        "text": "no data"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 8,
-        "x": 0,
-        "y": 1
-      },
-      "id": 30,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "vertical",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^Role$/",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": false,
-        "noValue": "-1"
-      },
-      "pluginVersion": "12.3.2",
-      "repeat": "dc1_nodes",
-      "repeatDirection": "h",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "pg_replication_is_replica{job=\"postgres\",instance=\"$dc1_nodes\"}",
-          "instant": true,
-          "legendFormat": "Role",
-          "refId": "Role"
-        }
-      ],
-      "title": "Role: ${dc1_nodes}",
-      "type": "stat"
     },
     {
       "datasource": {
@@ -382,7 +282,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 9
+        "y": 8
       },
       "id": 28,
       "options": {
