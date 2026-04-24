@@ -332,6 +332,10 @@
             "mode": "absolute",
             "steps": [
               {
+                "color": "red",
+                "value": null
+              },
+              {
                 "color": "green",
                 "value": 0
               },
@@ -366,7 +370,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 24,
+        "w": 8,
         "x": 0,
         "y": 12
       },
@@ -386,10 +390,11 @@
         },
         "showPercentChange": false,
         "textMode": "value",
-        "wideLayout": false
+        "wideLayout": false,
+        "noValue": "-1"
       },
       "pluginVersion": "12.3.2",
-      "repeat": "instance",
+      "repeat": "dc1_nodes",
       "repeatDirection": "h",
       "targets": [
         {
@@ -397,12 +402,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "node_load1{job=\"postgres\",instance=\"$instance\"}",
+          "expr": "node_load1{job=\"postgres\",instance=\"$dc1_nodes\"}",
           "legendFormat": "Load",
           "refId": "Load"
         }
       ],
-      "title": "Load: ${instance}",
+      "title": "Load: ${dc1_nodes}",
       "type": "stat"
     },
     {
