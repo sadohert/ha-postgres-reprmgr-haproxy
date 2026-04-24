@@ -54,10 +54,10 @@
         "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
-        "h": 4,
+        "h": 2,
         "w": 8,
         "x": 0,
-        "y": 1
+        "y": 3
       },
       "fieldConfig": {
         "defaults": {
@@ -66,22 +66,17 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "UNREACHABLE",
+                  "text": "DOWN",
                   "color": "red",
                   "index": 0
                 },
                 "1": {
-                  "text": "REACHABLE",
+                  "text": "",
                   "color": "green",
                   "index": 1
-                }
-              }
-            },
-            {
-              "type": "value",
-              "options": {
+                },
                 "-1": {
-                  "text": "no data",
+                  "text": "NO DATA",
                   "color": "red",
                   "index": 2
                 }
@@ -117,7 +112,7 @@
           "values": false
         },
         "orientation": "horizontal",
-        "textMode": "value",
+        "textMode": "none",
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
@@ -170,7 +165,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 8,
         "x": 0,
         "y": 5
@@ -278,7 +273,7 @@
         "h": 2,
         "w": 8,
         "x": 0,
-        "y": 10
+        "y": 1
       },
       "id": 30,
       "options": {
@@ -384,10 +379,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 8,
         "x": 0,
-        "y": 12
+        "y": 9
       },
       "id": 28,
       "options": {
