@@ -328,28 +328,34 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false,
-            "showPoints": "auto",
-            "pointSize": 5,
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
             "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -385,22 +391,16 @@
       },
       "id": 28,
       "options": {
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        },
         "legend": {
+          "calcs": [],
           "displayMode": "hidden",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": false
         },
-        "drawStyle": "line",
-        "lineInterpolation": "linear",
-        "lineWidth": 1,
-        "fillOpacity": 10,
-        "gradientMode": "none",
-        "spanNulls": false,
-        "showPoints": "auto",
-        "pointSize": 5
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "12.3.2",
       "repeat": "dc1_nodes",
