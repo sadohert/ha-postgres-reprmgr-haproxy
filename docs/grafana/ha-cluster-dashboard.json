@@ -198,7 +198,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{job=\"postgres\",mode=\"idle\", instance=~\"$dc1_nodes\"}[1m])) * 100)",
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{job=\"node\",mode=\"idle\", instance=~\"$dc1_nodes\"}[1m])) * 100)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "CPU"
@@ -325,19 +325,42 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
-          "mappings": [],
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
-                "value": null
-              },
-              {
                 "color": "green",
-                "value": 0
+                "value": null
               },
               {
                 "color": "orange",
@@ -349,24 +372,10 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "mappings": []
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Load"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Lag"
-            },
-            "properties": []
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 5,
@@ -376,22 +385,22 @@
       },
       "id": 28,
       "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "vertical",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^Load$/",
-          "values": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
         },
-        "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": false,
-        "noValue": "-1"
+        "legend": {
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "drawStyle": "line",
+        "lineInterpolation": "linear",
+        "lineWidth": 1,
+        "fillOpacity": 10,
+        "gradientMode": "none",
+        "spanNulls": false,
+        "showPoints": "auto",
+        "pointSize": 5
       },
       "pluginVersion": "12.3.2",
       "repeat": "dc1_nodes",
@@ -402,13 +411,13 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "node_load1{job=\"postgres\",instance=\"$dc1_nodes\"}",
+          "expr": "node_load1{job=\"node\",instance=\"$dc1_nodes\"}",
           "legendFormat": "Load",
           "refId": "Load"
         }
       ],
       "title": "Load: ${dc1_nodes}",
-      "type": "stat"
+      "type": "timeseries"
     },
     {
       "id": 38,
