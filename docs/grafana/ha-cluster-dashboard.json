@@ -245,7 +245,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "showValues": "never",
             "spanNulls": false,
             "stacking": {
@@ -274,7 +274,8 @@
             ]
           },
           "unit": "short",
-          "mappings": []
+          "mappings": [],
+          "decimals": 2
         },
         "overrides": []
       },
@@ -534,7 +535,7 @@
                 "scaleDistribution": {
                   "type": "linear"
                 },
-                "showPoints": "auto",
+                "showPoints": "never",
                 "showValues": "never",
                 "spanNulls": false,
                 "stacking": {
@@ -563,7 +564,8 @@
                 ]
               },
               "unit": "short",
-              "mappings": []
+              "mappings": [],
+              "decimals": 2
             },
             "overrides": []
           },
@@ -763,7 +765,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 8,
         "w": 24,
         "x": 0,
         "y": 19
@@ -778,7 +780,7 @@
         },
         "mergeValues": true,
         "rowHeight": 0.9,
-        "showValue": "auto",
+        "showValue": "never",
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
