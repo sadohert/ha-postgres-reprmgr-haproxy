@@ -790,7 +790,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "pg_up{instance=~\"$instance\"}",
+          "expr": "pg_up{instance=~\"$instance\", job=\"postgres\"}",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
@@ -879,7 +879,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "pg_replication_lag_seconds{instance=~\"$instance\"} * 1000",
+          "expr": "pg_replication_lag_seconds{instance=~\"$instance\", job=\"postgres\"} * 1000",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
@@ -981,7 +981,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$instance\"}[1m])) * 100)",
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$instance\", job=\"node\"}[1m])) * 100)",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
@@ -1070,7 +1070,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"})) * 100",
+          "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\", job=\"node\"} / node_memory_MemTotal_bytes{instance=~\"$instance\", job=\"node\"})) * 100",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
@@ -1171,7 +1171,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "sum by (instance) (rate(pg_stat_database_xact_commit{instance=~\"$instance\"}[1m]))",
+          "expr": "sum by (instance) (rate(pg_stat_database_xact_commit{instance=~\"$instance\", job=\"postgres\"}[1m]))",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
@@ -1260,7 +1260,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "sum by (instance) (pg_database_size_bytes{instance=~\"$instance\"})",
+          "expr": "sum by (instance) (pg_database_size_bytes{instance=~\"$instance\", job=\"postgres\"})",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }
@@ -1348,7 +1348,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "sum by (instance) (pg_stat_activity_count{state=\"active\", instance=~\"$instance\"})",
+          "expr": "sum by (instance) (pg_stat_activity_count{state=\"active\", instance=~\"$instance\", job=\"postgres\"})",
           "legendFormat": "{{instance}} - Active",
           "refId": "A"
         }
@@ -1450,7 +1450,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes_total{instance=~\"$instance\", device!=\"lo\"}[1m])",
+          "expr": "rate(node_network_receive_bytes_total{instance=~\"$instance\", device!=\"lo\", job=\"node\"}[1m])",
           "legendFormat": "{{instance}} - In",
           "refId": "A"
         }
@@ -1539,7 +1539,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "rate(node_disk_written_bytes_total{instance=~\"$instance\", device=\"nvme1n1\"}[1m])",
+          "expr": "rate(node_disk_written_bytes_total{instance=~\"$instance\", device=\"nvme1n1\", job=\"node\"}[1m])",
           "legendFormat": "{{instance}} - Write",
           "refId": "A"
         }
@@ -1640,7 +1640,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "pg_replication_lag_detailed_write_lag_seconds{instance=~\"$instance\"} * 1000",
+          "expr": "pg_replication_lag_detailed_write_lag_seconds{instance=~\"$instance\", job=\"postgres\"} * 1000",
           "refId": "A"
         }
       ],
@@ -1727,7 +1727,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "pg_replication_lag_detailed_flush_lag_seconds{instance=~\"$instance\"} * 1000",
+          "expr": "pg_replication_lag_detailed_flush_lag_seconds{instance=~\"$instance\", job=\"postgres\"} * 1000",
           "refId": "A"
         }
       ],
@@ -1814,7 +1814,7 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "pg_replication_lag_detailed_replay_lag_seconds{instance=~\"$instance\"} * 1000",
+          "expr": "pg_replication_lag_detailed_replay_lag_seconds{instance=~\"$instance\", job=\"postgres\"} * 1000",
           "refId": "A"
         }
       ],
