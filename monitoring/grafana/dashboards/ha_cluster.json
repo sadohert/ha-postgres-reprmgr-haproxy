@@ -332,15 +332,15 @@
         {
           "id": 35,
           "type": "stat",
-          "title": "DC2 Node Health",
-          "description": "Prometheus scrape target health for DC2 nodes. UNREACHABLE means the monitoring server cannot reach the postgres_exporter \u2014 either the node is down or the cross-DC network path is broken.",
+          "title": "${dc2_nodes}",
+          "description": "Card colour = health (up metric). Text = role.",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
           "gridPos": {
-            "h": 4,
-            "w": 24,
+            "h": 3,
+            "w": 8,
             "x": 0,
             "y": 0
           },
@@ -350,15 +350,25 @@
                 {
                   "type": "value",
                   "options": {
-                    "0": {
-                      "text": "UNREACHABLE",
+                    "-1": {
+                      "text": "NO DATA",
                       "color": "red",
                       "index": 0
                     },
-                    "1": {
-                      "text": "REACHABLE",
-                      "color": "green",
+                    "0": {
+                      "text": "DOWN",
+                      "color": "red",
                       "index": 1
+                    },
+                    "1": {
+                      "text": "\ud83d\udc51 PRIMARY",
+                      "color": "semi-dark-green",
+                      "index": 2
+                    },
+                    "2": {
+                      "text": "\ud83d\udccb REPLICA",
+                      "color": "semi-dark-blue",
+                      "index": 3
                     }
                   }
                 }
@@ -371,8 +381,12 @@
                     "value": null
                   },
                   {
-                    "color": "green",
+                    "color": "semi-dark-green",
                     "value": 1
+                  },
+                  {
+                    "color": "semi-dark-blue",
+                    "value": 2
                   }
                 ]
               },
@@ -392,22 +406,205 @@
               "values": false
             },
             "orientation": "horizontal",
-            "textMode": "value_and_name",
+            "textMode": "value",
             "colorMode": "background",
             "graphMode": "none",
-            "justifyMode": "auto"
+            "justifyMode": "auto",
+            "noValue": "-1"
           },
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "up{instance=~\"$dc2_nodes\", job=\"postgres\"}",
-              "legendFormat": "{{instance}}",
-              "refId": "A"
+              "expr": "(pg_replication_is_replica{job=\"postgres\",instance=\"$dc2_nodes\"} + 1) * on(instance) up{instance=\"$dc2_nodes\", job=\"postgres\"}",
+              "legendFormat": "Status",
+              "refId": "A",
+              "instant": true
             }
-          ]
+          ],
+          "repeat": "dc2_nodes",
+          "repeatDirection": "h"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 0,
+            "y": 3
+          },
+          "id": 39,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto",
+            "noValue": "-1"
+          },
+          "pluginVersion": "12.3.2",
+          "repeat": "dc2_nodes",
+          "repeatDirection": "h",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{job=\"node\",mode=\"idle\",instance=~\"$dc2_nodes\"}[1m])) * 100)",
+              "legendFormat": "__auto",
+              "refId": "CPU",
+              "editorMode": "code",
+              "range": true
+            }
+          ],
+          "title": "CPU: ${dc2_nodes}",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 4
+                  },
+                  {
+                    "color": "red",
+                    "value": 8
+                  }
+                ]
+              },
+              "unit": "short",
+              "mappings": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 0,
+            "y": 7
+          },
+          "id": 40,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "hidden",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.3.2",
+          "repeat": "dc2_nodes",
+          "repeatDirection": "h",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "expr": "node_load1{job=\"node\",instance=\"$dc2_nodes\"}",
+              "legendFormat": "__auto",
+              "refId": "Load",
+              "editorMode": "code",
+              "range": true,
+              "instant": false
+            }
+          ],
+          "title": "Load: ${dc2_nodes}",
+          "type": "timeseries"
         },
         {
           "id": 36,
@@ -422,7 +619,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 4
+            "y": 11
           },
           "fieldConfig": {
             "defaults": {
@@ -468,7 +665,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 4
+            "y": 11
           },
           "fieldConfig": {
             "defaults": {
