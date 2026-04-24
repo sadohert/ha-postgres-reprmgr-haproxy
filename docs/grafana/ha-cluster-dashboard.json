@@ -412,8 +412,11 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "expr": "node_load1{job=\"node\",instance=\"$dc1_nodes\"}",
-          "legendFormat": "Load",
-          "refId": "Load"
+          "legendFormat": "__auto",
+          "refId": "Load",
+          "range": true,
+          "instant": false,
+          "editorMode": "code"
         }
       ],
       "title": "Load: ${dc1_nodes}",
