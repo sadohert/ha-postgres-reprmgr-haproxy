@@ -47,11 +47,11 @@
     {
       "id": 34,
       "type": "stat",
-      "title": "DC1 Node Health",
+      "title": "Health: ${dc1_nodes}",
       "description": "Prometheus scrape target health (up=1 means Prometheus can reach the postgres_exporter). If scraping fails, all other metrics for that node are stale or absent.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "h": 4,
@@ -74,6 +74,16 @@
                   "text": "REACHABLE",
                   "color": "green",
                   "index": 1
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "no data",
+                  "color": "red",
+                  "index": 2
                 }
               }
             }
@@ -107,22 +117,25 @@
           "values": false
         },
         "orientation": "horizontal",
-        "textMode": "value_and_name",
+        "textMode": "value",
         "colorMode": "background",
         "graphMode": "none",
-        "justifyMode": "auto"
+        "justifyMode": "auto",
+        "noValue": "-1"
       },
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "up{instance=~\"$dc1_nodes\", job=\"postgres\"}",
-          "legendFormat": "{{instance}}",
+          "expr": "up{instance=\"$dc1_nodes\", job=\"postgres\"}",
+          "legendFormat": "Health",
           "refId": "A"
         }
-      ]
+      ],
+      "repeat": "dc1_nodes",
+      "repeatDirection": "h"
     },
     {
       "datasource": {
