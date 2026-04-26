@@ -537,6 +537,63 @@ Set up alerts for:
 
 ---
 
+---
+
+## DC2 / Multi-DC Issues
+
+### Issue: DC2 Standbys Show Wrong Upstream (`! pg1`) in Cluster Show
+
+**Symptoms:**
+
+```
+ 5  | pg5  | standby |   running | ! pg1    | dc2      | 0  | ...
+ 6  | pg6  | standby |   running | ! pg1    | dc2      | 0  | ...
+```
+
+repmgr warnings: `node "pg5" is not attached to its upstream node "pg1"`
+
+**Important distinction:** This is a **repmgr metadata problem**, not a streaming replication problem. The nodes may be streaming correctly from pg4 even while this warning appears. Confirm before taking action.
+
+**Diagnosis — verify actual streaming topology first:**
+
+```bash
+# On pg4: are pg5 and pg6 actually streaming from here?
+sudo -u postgres psql -c "SELECT application_name, client_addr, state, sent_lsn, replay_lsn FROM pg_stat_replication;"
+# Expect: rows for pg5 and pg6, state = streaming, LSNs in sync
+
+# On pg5 (and pg6): what upstream is primary_conninfo pointing at?
+sudo -u postgres psql -c "SHOW primary_conninfo;"
+# Expect: host=<pg4_private_ip> — if so, replication is correct, only metadata is wrong
+```
+
+**Cause:**
+
+`upstream_node_id` in `repmgr.conf` is **not a recognised parameter in repmgr 5.5** and is silently ignored. When `standby register` is run without `--upstream-node-id` on the CLI, repmgr defaults to registering against the primary (pg1), regardless of where the node is actually streaming from.
+
+**Fix — re-register with explicit upstream:**
+
+```bash
+# On pg5
+sudo -u postgres repmgr -f /etc/repmgr.conf standby register --upstream-node-id=4 --force
+
+# On pg6
+sudo -u postgres repmgr -f /etc/repmgr.conf standby register --upstream-node-id=4 --force
+```
+
+Verify result:
+
+```bash
+# From any node — should show pg5 and pg6 with pg4 as upstream, no warnings
+sudo -u postgres repmgr -f /etc/repmgr.conf cluster show
+```
+
+**When this can happen:**
+
+- After infrastructure is rebuilt (terraform recreate) and pg5/pg6 register themselves on first boot without `--upstream-node-id`
+- Any time `standby register --force` is run on a DC2 node without the flag (e.g. following the single-DC ops guide without adaptation)
+
+---
+
 ## Getting Help
 
 ### Information to Collect

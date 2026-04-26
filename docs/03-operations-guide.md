@@ -165,7 +165,11 @@ sudo -u postgres repmgr -h <NEW_PRIMARY_IP> -U repmgr -d repmgr \
 sudo systemctl start postgresql
 
 # Re-register as standby
+# DC1 nodes (pg1/2/3): register against the primary (default)
 sudo -u postgres repmgr -f /etc/repmgr.conf standby register --force
+# DC2 nodes (pg5/6): must explicitly declare pg4 as upstream, or repmgr
+# will register them against pg1 and cluster show will report "! pg1"
+# sudo -u postgres repmgr -f /etc/repmgr.conf standby register --upstream-node-id=4 --force
 ```
 
 ---
