@@ -52,14 +52,14 @@ scp -i "$SSH_KEY" -o StrictHostKeyChecking=no \
 
 # Step 4: Reload Grafana provisioning
 echo "Reloading Grafana provisioning..."
-RELOAD_RESULT=$(GRAFANA_PASS="$GRAFANA_PASS" MONITOR_HOST="$MONITOR_HOST" python3 -c "
+RELOAD_RESULT=$(GRAFANA_PASS="$GRAFANA_PASS" python3 -c "
 import urllib.request, urllib.error, os, json
 
 grafana_pass = os.environ['GRAFANA_PASS']
 import base64
 creds = base64.b64encode(f'admin:{grafana_pass}'.encode()).decode()
 req = urllib.request.Request(
-    f'http://{os.environ["MONITOR_HOST"]}:3000/api/admin/provisioning/dashboards/reload',
+    'http://${MONITOR_HOST}:3000/api/admin/provisioning/dashboards/reload',
     method='POST',
     headers={'Authorization': f'Basic {creds}', 'Content-Length': '0'}
 )
