@@ -5,7 +5,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # terraform.tfstate only exists in the main repo checkout — run from there, not from a worktree
 TERRAFORM_DIR="$REPO_ROOT/terraform"
 SSH_KEY="$TERRAFORM_DIR/ha-postgres-admin-key.pem"
-MONITOR_HOST="18.234.178.155"
+MONITOR_HOST=$(cd "$TERRAFORM_DIR" && terraform output -raw monitor_public_ip)
 GRAFANA_PASS=$(cd "$TERRAFORM_DIR" && terraform output -raw grafana_admin_password)
 
 WORKING_COPY="$REPO_ROOT/docs/grafana/ha-cluster-dashboard.json"
@@ -52,14 +52,14 @@ scp -i "$SSH_KEY" -o StrictHostKeyChecking=no \
 
 # Step 4: Reload Grafana provisioning
 echo "Reloading Grafana provisioning..."
-RELOAD_RESULT=$(GRAFANA_PASS="$GRAFANA_PASS" python3 -c "
+RELOAD_RESULT=$(GRAFANA_PASS="$GRAFANA_PASS" MONITOR_HOST="$MONITOR_HOST" python3 -c "
 import urllib.request, urllib.error, os, json
 
 grafana_pass = os.environ['GRAFANA_PASS']
 import base64
 creds = base64.b64encode(f'admin:{grafana_pass}'.encode()).decode()
 req = urllib.request.Request(
-    'http://18.234.178.155:3000/api/admin/provisioning/dashboards/reload',
+    f'http://{os.environ["MONITOR_HOST"]}:3000/api/admin/provisioning/dashboards/reload',
     method='POST',
     headers={'Authorization': f'Basic {creds}', 'Content-Length': '0'}
 )
