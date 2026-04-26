@@ -54,7 +54,7 @@
         "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
-        "h": 3,
+        "h": 2,
         "w": 8,
         "x": 0,
         "y": 1
@@ -340,7 +340,7 @@
             "uid": "prometheus"
           },
           "gridPos": {
-            "h": 3,
+            "h": 2,
             "w": 8,
             "x": 0,
             "y": 0
