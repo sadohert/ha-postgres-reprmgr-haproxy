@@ -1454,13 +1454,13 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "pg1 - Active"
+              "options": "pg1"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "#1A7C4F",
+                  "fixedColor": "#5794F2",
                   "mode": "fixed"
                 }
               }
@@ -1469,22 +1469,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "pg2 - Active"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#37872D",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pg3 - Active"
+              "options": "pg2"
             },
             "properties": [
               {
@@ -1499,13 +1484,13 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "pg4 - Active"
+              "options": "pg3"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "#73BF69",
+                  "fixedColor": "#E0752D",
                   "mode": "fixed"
                 }
               }
@@ -1514,82 +1499,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "pg5 - Active"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#96D98D",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pg6 - Active"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#BAE5B4",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pg1 - Idle"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#8E6B00",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pg2 - Idle"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#B59400",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pg3 - Idle"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#D4AE00",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pg4 - Idle"
+              "options": "pg4"
             },
             "properties": [
               {
@@ -1604,13 +1514,13 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "pg5 - Idle"
+              "options": "pg5"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "#FADE2A",
+                  "fixedColor": "#BF1B00",
                   "mode": "fixed"
                 }
               }
@@ -1619,13 +1529,13 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "pg6 - Idle"
+              "options": "pg6"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "#FFF05A",
+                  "fixedColor": "#BA43A9",
                   "mode": "fixed"
                 }
               }
@@ -1656,18 +1566,13 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "expr": "sum by (instance) (pg_stat_activity_count{state=\"active\", instance=~\"$instance\", job=\"postgres\"})",
-          "legendFormat": "{{instance}} - Active",
-          "refId": "A"
-        },
-        {
-          "expr": "sum by (instance) (pg_stat_activity_count{state=\"idle\", instance=~\"$instance\", job=\"postgres\"})",
-          "legendFormat": "{{instance}} - Idle",
-          "refId": "B",
+          "expr": "sum by (instance) (pg_stat_activity_count{instance=~\"$instance\", job=\"postgres\"})",
+          "legendFormat": "{{instance}}",
+          "refId": "A",
           "range": true
         }
       ],
-      "title": "Database Connections (by State)",
+      "title": "Database Connections (Total)",
       "type": "timeseries"
     },
     {
