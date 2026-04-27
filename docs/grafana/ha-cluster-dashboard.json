@@ -22,6 +22,63 @@
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "#e02f44",
+        "name": "Failure (node/service stopped)",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [
+            "failover"
+          ],
+          "type": "tags"
+        },
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "#56a64b",
+        "name": "Recovery (promoted / rejoined)",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [
+            "recovery"
+          ],
+          "type": "tags"
+        },
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "#5794f2",
+        "name": "Manual DR step (operator action)",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [
+            "dc2"
+          ],
+          "type": "tags"
+        },
+        "type": "dashboard"
       }
     ]
   },
