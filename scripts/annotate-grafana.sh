@@ -31,9 +31,14 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TERRAFORM_DIR="$REPO_ROOT/terraform"
 
+# ha-postgres Grafana (default)
 GRAFANA_URL="${GRAFANA_URL:-http://50.19.32.175:3000}"
 GRAFANA_PASS="${GRAFANA_PASS:-$(cd "$TERRAFORM_DIR" && terraform output -raw grafana_admin_password 2>/dev/null)}"
-DASHBOARD_UID="mattermost-ha-cluster"
+DASHBOARD_UID="${DASHBOARD_UID:-mattermost-ha-cluster}"
+
+# To also post to the mm-loadtest Grafana, set:
+#   LT_GRAFANA_URL=http://3.86.144.29:3000
+#   LT_GRAFANA_PASS=<from: cd ~/development/mattermost-load-test-ng && go run ./cmd/ltctl deployment info>
 
 TS="${1:?Usage: $0 <timestamp|now> <text> [tags] [#color]}"
 TEXT="${2:?Usage: $0 <timestamp|now> <text> [tags] [#color]}"
