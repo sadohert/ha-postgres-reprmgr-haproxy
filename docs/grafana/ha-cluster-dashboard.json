@@ -133,7 +133,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(\n  (pg_replication_is_replica{job=\"postgres\",instance=\"$dc1_nodes\"} + 1)\n  * on(instance) pg_up{instance=\"$dc1_nodes\", job=\"postgres\"}\n)\nOR\n(pg_up{instance=\"$dc1_nodes\", job=\"postgres\"} * 0)",
+          "expr": "(\n  (pg_replication_is_replica{job=\"postgres\",instance=\"$dc1_nodes\"} + 1)\n  * on(instance) group_left() pg_up{instance=\"$dc1_nodes\", job=\"postgres\"}\n)\nOR\n(pg_up{instance=\"$dc1_nodes\", job=\"postgres\"} * 0)",
           "instant": false,
           "legendFormat": "Status",
           "refId": "A",
