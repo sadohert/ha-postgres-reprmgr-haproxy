@@ -7,14 +7,20 @@ description: "Set up a git worktree for working on a GitHub project board issue 
 
 Creates a git worktree from `feature/dc2-warm-standby-nodes` scoped to a single GitHub issue, so each issue gets an isolated working tree with its own branch.
 
-## Step 1: Show open issues
+## Step 1: Resolve the issue
+
+If the user already specified an issue number, fetch it directly:
+
+```bash
+gh issue view <number> --repo sadohert/ha-postgres-reprmgr-haproxy --json number,title,url
+```
+
+If no issue was specified, list open issues and ask:
 
 ```bash
 gh issue list --repo sadohert/ha-postgres-reprmgr-haproxy --state open \
   --json number,title,url --jq '.[] | "#\(.number)  \(.title)  \(.url)"'
 ```
-
-Print the list for the user and ask which issue they want to work on if they haven't specified one.
 
 ## Step 2: Determine worktree name
 

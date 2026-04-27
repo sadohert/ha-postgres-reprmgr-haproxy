@@ -13,7 +13,7 @@ Both repos are siblings under the same parent directory:
 ```
 <parent>/
   ha-postgres-reprmgr-haproxy/   ← Terraform, scripts, this skill
-  mattermost-load-test-ng/       ← Playwright install (node_modules with @playwright/test)
+  mattermost-load-test-ng/       ← (load test tooling — not used for Playwright)
 ```
 
 Find `<parent>` by going up one level from the ha-postgres repo root. If in doubt, ask the user.
@@ -22,10 +22,10 @@ Find `<parent>` by going up one level from the ha-postgres repo root. If in doub
 
 If the user hasn't provided `FROM_TIME` and `TO_TIME`, ask:
 
-> "What time range do you want to capture? Provide start and end in UTC:
+> "What time range do you want to capture? Provide start and end as local time (EDT/EST — whatever you'd type into Grafana's time picker):
 > e.g. `2026-04-21 10:58:52` to `2026-04-21 13:00:00`"
 
-Timestamps are treated as UTC by the capture script.
+Timestamps are **local time (EDT/EST)**, matching what the user would type into Grafana's time picker. Do NOT append a UTC `Z` suffix — the capture script passes them verbatim.
 
 ## Step 2: Locate the scripts directory
 
@@ -78,11 +78,13 @@ If either differs, update the file in-place. This keeps the config current so th
 
 ## Step 5: Run the capture
 
+The worktree has its own `node_modules` — always run from the worktree root, not from any other location.
+
 ```bash
-cd <parent>/mattermost-load-test-ng/browser
+WORKTREE_DIR="$(dirname "$SCRIPTS_DIR")"
+cd "$WORKTREE_DIR"
 FROM_TIME="<from_time>" TO_TIME="<to_time>" \
-  npx playwright test \
-  --config "$SCRIPTS_DIR/playwright.config.ts" \
+  npx playwright test --config=scripts/playwright.config.ts \
   2>&1
 ```
 
@@ -104,6 +106,120 @@ open "$SCREENSHOTS_DIR"/*.png
 
 Report the full paths so the user can find them.
 
+## Step 7: Document to Confluence (when user wants a baseline or validation page)
+
+If the user asks to create a Confluence page, collect two things first if not already provided:
+- **Test conditions description** — ask the user for a freeform sentence or two describing what's being tested (e.g. "SC-01 validation, 500 concurrent users, 10 min soak after reprovision")
+- **Screenshots** from Step 6 (already in `$SCREENSHOTS_DIR`)
+
+Use the REST API directly — not MCP's `createConfluencePage`, which creates drafts that reject attachment uploads.
+
+### 7a: Read and sanitize the load test config files
+
+The three config files live under `<parent>/mattermost-load-test-ng/config/`:
+- `deployer.json`
+- `config.json`
+- `coordinator.json`
+
+Read each file and strip any local filesystem paths that would reveal the user's machine or key file location. Look for JSON fields whose values contain an absolute path (starts with `/` or `~`) and redact the value:
+
+```python
+import json, re
+
+def sanitize(obj):
+    if isinstance(obj, dict):
+        return {k: "<redacted>" if isinstance(v, str) and re.match(r'^[/~]', v) else sanitize(v)
+                for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [sanitize(i) for i in obj]
+    return obj
+
+with open("config/deployer.json") as f:
+    print(json.dumps(sanitize(json.load(f)), indent=2))
+```
+
+Run this for all three files. Use the sanitized output as the config content in the page.
+
+### 7b: Create the page
+
+```bash
+curl -s -X POST -u "$ATLASSIAN_EMAIL:$ATLASSIAN_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  "$ATLASSIAN_BASE_URL/wiki/rest/api/content" \
+  -d '{
+    "type": "page",
+    "status": "current",
+    "title": "<title>",
+    "ancestors": [{"id": "4489084941"}],
+    "space": {"key": "CO"},
+    "body": {"storage": {"representation": "storage", "value": "<p>placeholder</p>"}}
+  }' | python3 -m json.tool | grep '"id"' | head -1
+```
+
+Note the returned page ID.
+
+### 7c: Upload screenshots as attachments (run in parallel)
+
+```bash
+curl -s -u "$ATLASSIAN_EMAIL:$ATLASSIAN_API_TOKEN" \
+  -H "X-Atlassian-Token: no-check" \
+  -F "file=@<path-to-screenshot.png>;type=image/png" \
+  "$ATLASSIAN_BASE_URL/wiki/rest/api/content/<pageId>/child/attachment"
+```
+
+### 7d: Update the page body
+
+Build the body using this structure — Test Conditions first, then Configuration (inline code blocks, not attachments — easier to read), then Screenshots (collapsed expand macros):
+
+```xml
+<h2>Test Conditions</h2>
+<p><USER'S FREEFORM DESCRIPTION></p>
+
+<h2>Configuration</h2>
+
+<h3>deployer.json</h3>
+<ac:structured-macro ac:name="code">
+  <ac:parameter ac:name="language">json</ac:parameter>
+  <ac:rich-text-body><SANITIZED deployer.json CONTENT></ac:rich-text-body>
+</ac:structured-macro>
+
+<h3>config.json</h3>
+<ac:structured-macro ac:name="code">
+  <ac:parameter ac:name="language">json</ac:parameter>
+  <ac:rich-text-body><SANITIZED config.json CONTENT></ac:rich-text-body>
+</ac:structured-macro>
+
+<h3>coordinator.json</h3>
+<ac:structured-macro ac:name="code">
+  <ac:parameter ac:name="language">json</ac:parameter>
+  <ac:rich-text-body><SANITIZED coordinator.json CONTENT></ac:rich-text-body>
+</ac:structured-macro>
+
+<h2>Screenshots</h2>
+<ac:structured-macro ac:name="expand">
+  <ac:parameter ac:name="title">HA Cluster</ac:parameter>
+  <ac:rich-text-body>
+    <p><ac:image><ri:attachment ri:filename="<ha-cluster-filename>.png"/></ac:image></p>
+  </ac:rich-text-body>
+</ac:structured-macro>
+<ac:structured-macro ac:name="expand">
+  <ac:parameter ac:name="title">Load Test Performance</ac:parameter>
+  <ac:rich-text-body>
+    <p><ac:image><ri:attachment ri:filename="<loadtest-filename>.png"/></ac:image></p>
+  </ac:rich-text-body>
+</ac:structured-macro>
+<ac:structured-macro ac:name="expand">
+  <ac:parameter ac:name="title">Mattermost Performance v2</ac:parameter>
+  <ac:rich-text-body>
+    <p><ac:image><ri:attachment ri:filename="<mm-perf-filename>.png"/></ac:image></p>
+  </ac:rich-text-body>
+</ac:structured-macro>
+```
+
+Pass this as version 2 in a PUT to `$ATLASSIAN_BASE_URL/wiki/rest/api/content/<pageId>`.
+
+Report the final page URL: `https://mattermost.atlassian.net/wiki/spaces/CO/pages/<pageId>`
+
 ## Dashboard Reference
 
 | Instance | Dashboard name | UID |
@@ -116,7 +232,7 @@ Report the full paths so the user can find them.
 
 **Login failure for ha-postgres**: Check the Grafana admin password with `terraform output -raw grafana_admin_password` from the terraform directory and compare against the `password` field in `grafana-capture.config.ts`.
 
-**`npx playwright test` not found**: Make sure you're running from `mattermost-load-test-ng/browser/` where `node_modules/@playwright/test` is installed. Run `npm install` first if needed.
+**`npx playwright test` not found or wrong version error**: Make sure you're running from the worktree root (`$(dirname $SCRIPTS_DIR)`), not from any other location. The worktree has its own `node_modules` — mixing it with another Playwright install causes version conflicts. Run `npm install` inside the worktree root if node_modules is missing.
 
 **Dashboard shows "No data"**: The time range may fall outside the window where metrics exist. Verify the range against Prometheus data: `curl -s "http://<monitor_ip>:9090/api/v1/query?query=up" | python3 -m json.tool | grep value`.
 

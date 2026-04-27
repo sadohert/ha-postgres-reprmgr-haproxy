@@ -1,0 +1,31 @@
+{
+  "name": "ha-postgres-skills",
+  "owner": {
+    "name": "Stuart Doherty",
+    "email": "stu.doherty@gmail.com"
+  },
+  "metadata": {
+    "description": "Project-local Claude Code skills for the ha-postgres-reprmgr-haproxy HA cluster project",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "grafana-capture",
+      "description": "Capture Grafana dashboard screenshots using Playwright",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./grafana-capture/grafana-capture"
+      ]
+    },
+    {
+      "name": "issue-worktree",
+      "description": "Set up a git worktree for working on a GitHub project board issue in the ha-postgres-reprmgr-haproxy repo",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./issue-worktree/issue-worktree"
+      ]
+    }
+  ]
+}
