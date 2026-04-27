@@ -2145,40 +2145,6 @@
       {
         "current": {
           "selected": true,
-          "text": "pg1",
-          "value": "pg1"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Primary Writer",
-        "multi": false,
-        "name": "primary_dc1_node",
-        "options": [
-          {
-            "selected": true,
-            "text": "pg1",
-            "value": "pg1"
-          },
-          {
-            "selected": false,
-            "text": "pg2",
-            "value": "pg2"
-          },
-          {
-            "selected": false,
-            "text": "pg3",
-            "value": "pg3"
-          }
-        ],
-        "query": "pg1,pg2,pg3",
-        "queryValue": "",
-        "skipUrlSync": false,
-        "type": "custom",
-        "description": "Current DC1 primary writer \u2014 update after failover"
-      },
-      {
-        "current": {
-          "selected": true,
           "text": [
             "All"
           ],
